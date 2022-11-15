@@ -1,0 +1,87 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: simpletemplate-example
+metadata:
+  name: simpletemplate-example
+parameters:
+- name: count
+  displayName: Count
+- name: namespace
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: hello-openshift${count}
+      projectclient: poc-example
+    name: hello-openshift${count}
+    namespace: ${namespace}
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: hello-openshift${count}
+      deployment: hello-openshift${count}
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: hello-openshift${count}
+      app.kubernetes.io/part-of: hello-openshift${count}-app
+      projectclient: poc-example
+    name: hello-openshift${count}
+    namespace: ${namespace}
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: hello-openshift${count}
+    strategy:
+      rollingUpdate:
+        maxSurge: 25%
+        maxUnavailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: hello-openshift${count}
+          projectclient: poc-example
+          deployment: hello-openshift${count}
+      spec:
+        containers:
+        - image: quay.io/openshifttest/hello-openshift:winc-1.2.0
+          imagePullPolicy: Always
+          name: hello-openshift${count}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8888
+            protocol: TCP
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+        restartPolicy: Always
+        securityContext: {}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: hello-openshift${count}
+      projectclient: poc-example
+    name: hello-openshift${count}
+    namespace: ${namespace}
+  spec:
+    host: hello-openshift${count}.apps.poc-cluster.t8be.p1.openshiftapps.com
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: hello-openshift${count}
