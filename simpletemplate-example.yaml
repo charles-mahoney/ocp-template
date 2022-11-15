@@ -79,7 +79,6 @@ objects:
     name: hello-openshift${count}
     namespace: ${namespace}
   spec:
-    host: hello-openshift${count}.apps.poc-cluster.t8be.p1.openshiftapps.com
     port:
       targetPort: 8080-tcp
     to:
