@@ -1,0 +1,19 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: namespacetemplate-example
+metadata:
+  name: namespacetemplate-example
+parameters:
+- name: namespace
+objects:
+- apiVersion: project.openshift.io/v1
+  kind: Project
+  metadata:
+    annotations:
+      openshift.io/description: "My Description for the selector namespace"
+      openshift.io/display-name: "MY Selector Namespace"
+    labels:
+      owningManager: MrBoss
+      owningemail: owneremail..at..company.co
+    name: ${namespace}
